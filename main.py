@@ -6,45 +6,42 @@ DELETE = 'D'
 
 
 def mark_d_delete(d):
-    if 'item' in d and d['item'] == 'Equity':
-        print('*' * 70)
     if DELETE in d:
         return 0
     else:
         d[DELETE] = True
-        print('deleted')
         return 1
 
 
 def visit_l(parent_d, l):
-    print('visit_l')
-    deleted = 0
+    # how many items are marked as to be deleted
+    del_cnt = 0
+    # if list is empty, parent dict should delete
     if parent_d and l and all(DELETE in x for x in l):
-        deleted += mark_d_delete(parent_d)
+        del_cnt += mark_d_delete(parent_d)
     for d in l:
         if DELETE in d:
             continue
-        if 'item' in d:
-            print(d['item'])
         sections = d['sections']
         if sections:
             if all(DELETE in se for se in sections):
-                deleted += mark_d_delete(d)
+                del_cnt += mark_d_delete(d)
             for sec in sections:
-                print(sec['item'])
                 if DELETE in sec:
                     continue
-                if (not sec['sections']) and sec['value'] == 'None':
-                    deleted += mark_d_delete(sec)
-                deleted += visit_l(sec, sec['sections'])
+                if not sec['sections'] and sec['value'] == 'None':
+                    del_cnt += mark_d_delete(sec)
+                del_cnt += visit_l(sec, sec['sections'])
         elif d['value'] == 'None':
-            deleted += mark_d_delete(d)
-    return deleted
+            del_cnt += mark_d_delete(d)
+    return del_cnt
 
 
 def remove_d_if_marked(l):
     deleted = False
     index = len(l) - 1
+    # removing items while iterating is dangerous
+    # iterating reversed indexes is better
     while index >= 0:
         if DELETE in l[index]:
             del l[index]
@@ -60,12 +57,11 @@ def delete_empty(l):
         if sections:
             delete_empty(sections)
 
-
-d = 1
-while d > 0:
-    print(d)
-    d = visit_l(None, data)
-pprint(data)
+# loop until no more item marked as delete
+while visit_l(None, data):
+    pass
+# pprint(data) # debug
+# loop until no more item deleted
 while delete_empty(data):
     pass
 pprint(data)
