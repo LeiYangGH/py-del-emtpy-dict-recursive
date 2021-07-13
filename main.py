@@ -206,6 +206,8 @@ DELETE = 'D'
 
 
 def mark_d_delete(d):
+    if 'item' in d and d['item'] == 'Equity':
+        print('*' * 70)
     if DELETE in d:
         return 0
     else:
@@ -214,9 +216,11 @@ def mark_d_delete(d):
         return 1
 
 
-def visit_l(l):
+def visit_l(parent_d, l):
     print('visit_l')
     deleted = 0
+    if parent_d and l and all(DELETE in x for x in l):
+        deleted += mark_d_delete(parent_d)
     for d in l:
         if DELETE in d:
             continue
@@ -230,9 +234,9 @@ def visit_l(l):
                 print(sec['item'])
                 if DELETE in sec:
                     continue
-                if not sec['sections'] and sec['value'] == 'None':
+                if (not sec['sections']) and sec['value'] == 'None':
                     deleted += mark_d_delete(sec)
-                deleted += visit_l(sec['sections'])
+                deleted += visit_l(sec, sec['sections'])
         elif d['value'] == 'None':
             deleted += mark_d_delete(d)
     return deleted
@@ -241,7 +245,8 @@ def visit_l(l):
 d = 1
 while d > 0:
     print(d)
-    d = visit_l(data)
+    d = visit_l(None, data)
 
 pprint(data)
-# pprint(json.dumps(data))
+
+# print(json.dumps(data))
