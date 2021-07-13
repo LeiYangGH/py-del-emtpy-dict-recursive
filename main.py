@@ -205,6 +205,15 @@ data = [
 DELETE = 'D'
 
 
+def mark_d_delete(d):
+    if DELETE in d:
+        return 0
+    else:
+        d[DELETE] = True
+        print('deleted')
+        return 1
+
+
 def visit_l(l):
     print('visit_l')
     deleted = 0
@@ -215,29 +224,17 @@ def visit_l(l):
             print(d['item'])
         sections = d['sections']
         if sections:
-
             if all(DELETE in se for se in sections):
-                if not DELETE in d:
-                    d[DELETE] = True
-                    print('deleted')
-                    deleted += 1
+                deleted += mark_d_delete(d)
             for sec in sections:
                 print(sec['item'])
                 if DELETE in sec:
                     continue
-
                 if not sec['sections'] and sec['value'] == 'None':
-                    if not DELETE in sec:
-                        sec[DELETE] = True
-                        print('deleted')
-                        deleted += 1
+                    deleted += mark_d_delete(sec)
                 deleted += visit_l(sec['sections'])
         elif d['value'] == 'None':
-            if not DELETE in d:
-                d[DELETE] = True
-                # del l[index]
-                print('deleted')
-                deleted += 1
+            deleted += mark_d_delete(d)
     return deleted
 
 
